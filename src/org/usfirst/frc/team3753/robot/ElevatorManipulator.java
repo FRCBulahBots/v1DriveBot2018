@@ -2,6 +2,7 @@ package org.usfirst.frc.team3753.robot;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.PWMTalonSRX;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class ElevatorManipulator {
 	// Class Vars we need
@@ -21,6 +22,8 @@ public class ElevatorManipulator {
         }else if(MinLimitSwitch.get()) { // If the Min limit switch is pressed, we want to keep the values between 0 and 1
             dir = Math.max(dir, 0);
         }
+		SmartDashboard.putBoolean("Elevator Min Switch: ", MinLimitSwitch.get());
+		SmartDashboard.putBoolean("Elevator Max Switch: ", MaxLimitSwitch.get());
         motorLift.set(dir);
 	}
 	

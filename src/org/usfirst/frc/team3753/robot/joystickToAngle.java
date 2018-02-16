@@ -1,29 +1,50 @@
 package org.usfirst.frc.team3753.robot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class joystickToAngle {
 
-	double finalAngle = 0.0f; // We need to keep this within a range of -180 and 180. We will start in neutral (0).
-	double multiplier = 0.0f;
+	double finalOutput;
+	double deadBandOffset = 0.1f; // values used to show to determine if joystick is close enough to 0 to be considered 'untouched' so gyro can take over.
+	double currentJoystickValue;
+	double currentGyroAngle;
+	double gyroSetpointAngle;
+	double kPSetpoint = 0.029f;
+	boolean gyroControl = false;
 	
-	public joystickToAngle(double mul) {
-		multiplier = mul;
-	}
 	
-	public void setMultiplier(double mul) {
-		multiplier = mul;
+	public joystickToAngle(double deadband, double kP) {
+		kPSetpoint = kP;
+		deadBandOffset = deadband;
 	}
+
 	
 	public void overrideAngle(double ang) {
-		finalAngle = ang;
+		gyroSetpointAngle = ang;
 	}
 	
-	public void feed(double val) { // Call this whenever we can to feed the sumer with new joystick data
-		finalAngle += (val * multiplier);
-		// finalAngle = clamp(finalAngle, -180, 180); // May not to clamp if AHRS is using continious output scheme.
+	public void feed(double joyval, double gyroangle) { // Call this whenever we can to feed the sumer with new joystick data
+		currentJoystickValue = joyval;
+		currentGyroAngle = gyroangle;
+		if (!(!(joyval > (deadBandOffset * -1)) || (joyval > deadBandOffset))) { // Joystick is within deadband value Need to do Gyro compensation.
+			gyroControl = true;
+			finalOutput = (gyroSetpointAngle - gyroangle) * kPSetpoint;
+		} else {
+			gyroControl = false;
+			finalOutput = joyval;
+		gyroSetpointAngle = gyroangle;
+		}
+		pushDashData();
 	}
 	
-	public double getAngle() {
-		return finalAngle;
+	public double getTurnData() {
+		return finalOutput;
+	}
+	
+	private void pushDashData() {
+		SmartDashboard.putNumber("Turning Joystick value: ", currentJoystickValue);
+		SmartDashboard.putBoolean("Gyro in control: ", gyroControl);
+		SmartDashboard.putNumber("Gyro Setpoint Angle: ", gyroSetpointAngle);
+		SmartDashboard.putNumber("Turning output Value: ", finalOutput);
 	}
 	
 	public static double clamp(double val, double min, double max) {
