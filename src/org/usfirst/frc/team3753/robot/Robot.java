@@ -22,41 +22,26 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Robot extends IterativeRobot {
 	
-	/// CONSTANT VALUES HERE
-	private static final double DriveTrainRotatejoytoAngMultiplier = 0.1f; // Will need tuning
-	private static final int DriveTrainRotateJoystickAxis = 4; // Joystick Axis we will use for turning the robot
-	
-	private static final double kP = 0.009; // proportional turning constant for Yaw Gyro rotation Compensation
-	
-	private static final int kLeftMotorPort = 0; // Drive Motor Left side
-	private static final int kRightMotorPort =  1; // Drive Motor Right side
-	
-	private static final int kLiftMotorPort = 2; // Elevator Drive motor Port
-	private static final int kLiftMotorMinLimitSwitchPort = 0; // Elevator Max Pos Limit Switch Port (DIO)
-	private static final int kLiftMotorMaxLimitSwitchPort = 1; // Elevator Mix Pos Limit Switch Port (DIO)
-	
-	private static final int kJoystickPort = 0; // Controller joystick port on DS
-	/// END OF CONSTANTS
 	
 	AHRS ahrs; // NavX MXP Class Library
 	
 	///DriveTrain Rotation section
-	private joystickToAngle DriveJoytoAng = new joystickToAngle(0.32f, 0.019f);
+	private joystickToAngle DriveJoytoAng = new joystickToAngle(RobotParamCollection.driveControllerDeadband, RobotParamCollection.turnKP);
 	/// End of DriveTrain Rotation section
 	
 	/// Drive Motors
-	private VictorSP DriveMotorLeft= new VictorSP(kLeftMotorPort);
-	private VictorSP DriveMotorRight = new VictorSP(kRightMotorPort);
+	private VictorSP DriveMotorLeft= new VictorSP(RobotParamCollection.kLeftMotorPort);
+	private VictorSP DriveMotorRight = new VictorSP(RobotParamCollection.kRightMotorPort);
 	
 	private DifferentialDrive DriveTrain = new DifferentialDrive(DriveMotorLeft, DriveMotorRight);
 	/// End of Drive Motors
 	
 	/// Elevator Manipulator
-	private ElevatorManipulator elevator = new ElevatorManipulator(kLiftMotorPort, kLiftMotorMinLimitSwitchPort, kLiftMotorMaxLimitSwitchPort);
+	private ElevatorManipulator elevator = new ElevatorManipulator(RobotParamCollection.kLiftMotorPort, RobotParamCollection.kLiftMotorMinLimitSwitchPort, RobotParamCollection.kLiftMotorMaxLimitSwitchPort);
 	/// End of Elevator Manipulator
 	
 	
-	private Joystick m_joystick = new Joystick(kJoystickPort); // Main joystick controller for Robot
+	private Joystick m_joystick = new Joystick(RobotParamCollection.kJoystickPort); // Main joystick controller for Robot
 
 	@Override
 	public void robotInit() {
@@ -65,7 +50,7 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void teleopPeriodic() {
-		DriveJoytoAng.feed(m_joystick.getRawAxis(DriveTrainRotateJoystickAxis), ahrs.getAngle()); // Feed the Angle calculator before we read from it
+		DriveJoytoAng.feed(m_joystick.getRawAxis(RobotParamCollection.DriveTrainRotateJoystickAxis), ahrs.getAngle()); // Feed the Angle calculator before we read from it
 		DriveTrain.arcadeDrive(m_joystick.getY() * -1, DriveJoytoAng.getTurnData());
 		
 		elevator.loopFeed(((m_joystick.getRawAxis(2)*-1) + m_joystick.getRawAxis(3)));
