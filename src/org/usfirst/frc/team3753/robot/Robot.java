@@ -56,14 +56,14 @@ public class Robot extends IterativeRobot {
 		DriveTrain.arcadeDrive(m_joystick.getY() * -1, DriveJoytoAng.getTurnData());
 		
 		elevator.loopFeed(((m_joystick.getRawAxis(2)*-1) + m_joystick.getRawAxis(3)));
-		boxmanipulator.processVal(RobotEnums.BoxManipulator.HOLD);
+		boxmanipulator.processCMD(RobotEnums.BoxManipulator.HOLD);
 		if(m_joystick.getRawButton(5)) {
-			boxmanipulator.processVal(RobotEnums.BoxManipulator.DEPOSIT);
+			boxmanipulator.processCMD(RobotEnums.BoxManipulator.DEPOSIT);
 		}
 		if(m_joystick.getRawButton(6)) {
-			boxmanipulator.processVal(RobotEnums.BoxManipulator.RECEIVE);
+			boxmanipulator.processCMD(RobotEnums.BoxManipulator.RECEIVE);
 		}
-		boxmanipulator.process();
+		boxmanipulator.execute();
 		pushNavXDataToDash();
 	}
 	

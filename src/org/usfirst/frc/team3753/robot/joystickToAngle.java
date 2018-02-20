@@ -41,10 +41,10 @@ public class JoystickToAngle {
 	}
 	
 	private void pushDashData() {
-		SmartDashboard.putNumber("Turning Joystick value: ", currentJoystickValue);
+	//	SmartDashboard.putNumber("Turning Joystick value: ", currentJoystickValue);
 		SmartDashboard.putBoolean("Gyro in control: ", gyroControl);
 		SmartDashboard.putNumber("Gyro Setpoint Angle: ", gyroSetpointAngle);
-		SmartDashboard.putNumber("Turning output Value: ", finalOutput);
+	//	SmartDashboard.putNumber("Turning output Value: ", finalOutput);
 	}
 	
 	public static double clamp(double val, double min, double max) {

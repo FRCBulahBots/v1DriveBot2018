@@ -19,15 +19,15 @@ public class BoxManipulator {
 	
 	public void loopFeed(double joyval) {
 		if(joyval > 0.2f) {
-			processVal(RobotEnums.BoxManipulator.RECEIVE);
+			processCMD(RobotEnums.BoxManipulator.RECEIVE);
 		} else if (joyval < 0.2f && joyval > -0.2f) {
-			processVal(RobotEnums.BoxManipulator.HOLD);
+			processCMD(RobotEnums.BoxManipulator.HOLD);
 		} else {
-			processVal(RobotEnums.BoxManipulator.DEPOSIT);
+			processCMD(RobotEnums.BoxManipulator.DEPOSIT);
 		}
 	}
 	
-	public void process() {
+	public void execute() {
 		driveMotors(motordir);
 	}
 	
@@ -36,7 +36,7 @@ public class BoxManipulator {
 		leftSideMotors.set(dir * motorSpeed);
 	}
 	
-	public void processVal(RobotEnums.BoxManipulator cmd) {	
+	public void processCMD(RobotEnums.BoxManipulator cmd) {	
 		switch (cmd){
 			case RECEIVE:
 				motordir = 1;
