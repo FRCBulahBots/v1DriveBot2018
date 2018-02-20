@@ -8,6 +8,10 @@ public class RobotParamCollection {
 	public static final int kLeftMotorPort = 0; // Drive Motor Left side
 	public static final int kRightMotorPort =  1; // Drive Motor Right side
 	
+	public static final int kRightsideBoxManipulatorPort = 3;
+	public static final int kLeftsideBoxMaipulatorPort = 4;
+	public static final double kMotorSpeedBoxManipulator = 1.0f;
+	
 	public static final int kLiftMotorPort = 2; // Elevator Drive motor Port
 	public static final int kLiftMotorMinLimitSwitchPort = 0; // Elevator Max Pos Limit Switch Port (DIO)
 	public static final int kLiftMotorMaxLimitSwitchPort = 1; // Elevator Mix Pos Limit Switch Port (DIO)

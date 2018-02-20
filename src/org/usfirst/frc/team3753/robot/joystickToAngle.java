@@ -1,7 +1,7 @@
 package org.usfirst.frc.team3753.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class joystickToAngle {
+public class JoystickToAngle {
 
 	double finalOutput;
 	double deadBandOffset = 0.1f; // values used to show to determine if joystick is close enough to 0 to be considered 'untouched' so gyro can take over.
@@ -12,7 +12,7 @@ public class joystickToAngle {
 	boolean gyroControl = false;
 	
 	
-	public joystickToAngle(double deadband, double kP) {
+	public JoystickToAngle(double deadband, double kP) {
 		kPSetpoint = kP;
 		deadBandOffset = deadband;
 	}

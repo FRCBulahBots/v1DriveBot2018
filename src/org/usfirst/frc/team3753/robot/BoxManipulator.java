@@ -5,6 +5,7 @@ public class BoxManipulator {
 	private Spark rightSideMotors;
 	private Spark leftSideMotors;
 	private double motorSpeed;
+	private int motordir;
 	
 	public BoxManipulator(int rightsidemotorport, int leftsidemotorport, double speed) {
 		rightSideMotors = new Spark(rightsidemotorport);
@@ -26,21 +27,25 @@ public class BoxManipulator {
 		}
 	}
 	
+	public void process() {
+		driveMotors(motordir);
+	}
+	
 	private void driveMotors(int dir) {
 		rightSideMotors.set(dir * motorSpeed * -1);
 		leftSideMotors.set(dir * motorSpeed);
 	}
 	
-	private void processVal(RobotEnums.BoxManipulator cmd) {	
+	public void processVal(RobotEnums.BoxManipulator cmd) {	
 		switch (cmd){
 			case RECEIVE:
-				driveMotors(1);
+				motordir = 1;
 				break;
 			case HOLD:
-				driveMotors(0);
+				motordir = 0;
 				break;
 			case DEPOSIT:
-				driveMotors(-1);
+				motordir = -1;
 				break;
 		}
 	}

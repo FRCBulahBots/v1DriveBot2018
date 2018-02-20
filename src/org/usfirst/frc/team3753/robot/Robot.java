@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.VictorSP;
-import edu.wpi.first.wpilibj.PWMTalonSRX;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -26,7 +25,7 @@ public class Robot extends IterativeRobot {
 	AHRS ahrs; // NavX MXP Class Library
 	
 	///DriveTrain Rotation section
-	private joystickToAngle DriveJoytoAng = new joystickToAngle(RobotParamCollection.driveControllerDeadband, RobotParamCollection.turnKP);
+	private JoystickToAngle DriveJoytoAng = new JoystickToAngle(RobotParamCollection.driveControllerDeadband, RobotParamCollection.turnKP);
 	/// End of DriveTrain Rotation section
 	
 	/// Drive Motors
@@ -40,7 +39,10 @@ public class Robot extends IterativeRobot {
 	private ElevatorManipulator elevator = new ElevatorManipulator(RobotParamCollection.kLiftMotorPort, RobotParamCollection.kLiftMotorMinLimitSwitchPort, RobotParamCollection.kLiftMotorMaxLimitSwitchPort);
 	/// End of Elevator Manipulator
 	
+	/// Box Manipulator
+	private BoxManipulator boxmanipulator = new BoxManipulator(RobotParamCollection.kLeftsideBoxMaipulatorPort, RobotParamCollection.kRightsideBoxManipulatorPort, RobotParamCollection.kMotorSpeedBoxManipulator);
 	
+	/// End of Box Manipulator
 	private Joystick m_joystick = new Joystick(RobotParamCollection.kJoystickPort); // Main joystick controller for Robot
 
 	@Override
@@ -54,7 +56,14 @@ public class Robot extends IterativeRobot {
 		DriveTrain.arcadeDrive(m_joystick.getY() * -1, DriveJoytoAng.getTurnData());
 		
 		elevator.loopFeed(((m_joystick.getRawAxis(2)*-1) + m_joystick.getRawAxis(3)));
-		
+		boxmanipulator.processVal(RobotEnums.BoxManipulator.HOLD);
+		if(m_joystick.getRawButton(5)) {
+			boxmanipulator.processVal(RobotEnums.BoxManipulator.DEPOSIT);
+		}
+		if(m_joystick.getRawButton(6)) {
+			boxmanipulator.processVal(RobotEnums.BoxManipulator.RECEIVE);
+		}
+		boxmanipulator.process();
 		pushNavXDataToDash();
 	}
 	
@@ -77,9 +86,9 @@ public class Robot extends IterativeRobot {
         SmartDashboard.putBoolean(  "IMU_IsRotating",       ahrs.isRotating());
   
         /* Sensor Board Information                                                 */
-        SmartDashboard.putString(   "FirmwareVersion",      ahrs.getFirmwareVersion());
+       // SmartDashboard.putString(   "FirmwareVersion",      ahrs.getFirmwareVersion());
         /* Connectivity Debugging Support                                           */
-        SmartDashboard.putNumber(   "IMU_Byte_Count",       ahrs.getByteCount());
-        SmartDashboard.putNumber(   "IMU_Update_Count",     ahrs.getUpdateCount());
+        //SmartDashboard.putNumber(   "IMU_Byte_Count",       ahrs.getByteCount());
+       // SmartDashboard.putNumber(   "IMU_Update_Count",     ahrs.getUpdateCount());
 	}
 }
