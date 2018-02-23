@@ -25,7 +25,7 @@ public class Robot extends IterativeRobot {
 	AHRS ahrs; // NavX MXP Class Library
 	
 	///DriveTrain Rotation section
-	private JoystickToAngle DriveJoytoAng = new JoystickToAngle(RobotParamCollection.driveControllerDeadband, RobotParamCollection.turnKP);
+	private JoystickToAngle DriveJoytoAng = new JoystickToAngle(RobotParamCollection.kdriveControllerDeadband, RobotParamCollection.kturnKP);
 	/// End of DriveTrain Rotation section
 	
 	/// Drive Motors
@@ -52,10 +52,17 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void teleopPeriodic() {
-		DriveJoytoAng.feed(m_joystick.getRawAxis(RobotParamCollection.DriveTrainRotateJoystickAxis), ahrs.getAngle()); // Feed the Angle calculator before we read from it
-		DriveTrain.arcadeDrive(m_joystick.getY() * -1, DriveJoytoAng.getTurnData());
-		
+		processDriveTrain();
+		processElevator();
+		processBoxManipulator();
+		pushNavXDataToDash();
+	}
+	
+	public void processElevator() {
 		elevator.loopFeed(((m_joystick.getRawAxis(2) * -1) + m_joystick.getRawAxis(3)));
+	}
+	
+	public void processBoxManipulator() {
 		boxmanipulator.processCMD(RobotEnums.BoxManipulator.HOLD);
 		if(m_joystick.getRawButton(5)) {
 			boxmanipulator.processCMD(RobotEnums.BoxManipulator.DEPOSIT);
@@ -64,9 +71,13 @@ public class Robot extends IterativeRobot {
 			boxmanipulator.processCMD(RobotEnums.BoxManipulator.RECEIVE);
 		}
 		boxmanipulator.execute();
-		pushNavXDataToDash();
 	}
 	
+	public void processDriveTrain() {
+		DriveJoytoAng.feed(m_joystick.getRawAxis(RobotParamCollection.DriveTrainRotateJoystickAxis), ahrs.getAngle()); // Feed the Angle calculator before we read from it
+		DriveTrain.arcadeDrive(m_joystick.getY() * -1 * RobotParamCollection.kMotorSpeedDriveTrain, DriveJoytoAng.getTurnData());
+
+	}
 	
 	public void initNavXMXP() {
 		try {
