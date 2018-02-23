@@ -8,7 +8,7 @@ public class JoystickToAngle {
 	double currentJoystickValue;
 	double currentGyroAngle;
 	double gyroSetpointAngle;
-	double kPSetpoint = 0.029f;
+	double kPSetpoint = 0.009f;
 	boolean gyroControl = false;
 	
 	
@@ -27,10 +27,11 @@ public class JoystickToAngle {
 		currentGyroAngle = gyroangle;
 		if (!(!(joyval > (deadBandOffset * -1)) || (joyval > deadBandOffset))) { // Joystick is within deadband value Need to do Gyro compensation.
 			gyroControl = true;
-			finalOutput = (gyroSetpointAngle - gyroangle) * kPSetpoint;
+//			finalOutput = (gyroSetpointAngle - gyroangle) * kPSetpoint;
+			finalOutput = clamp((gyroSetpointAngle - gyroangle) * kPSetpoint, -1, 1); // Ensure values are clamped for the 
 		} else {
 			gyroControl = false;
-			finalOutput = joyval;
+			finalOutput = joyval * 1.0f;
 		gyroSetpointAngle = gyroangle;
 		}
 		pushDashData();

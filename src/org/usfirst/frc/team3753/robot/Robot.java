@@ -55,7 +55,7 @@ public class Robot extends IterativeRobot {
 		DriveJoytoAng.feed(m_joystick.getRawAxis(RobotParamCollection.DriveTrainRotateJoystickAxis), ahrs.getAngle()); // Feed the Angle calculator before we read from it
 		DriveTrain.arcadeDrive(m_joystick.getY() * -1, DriveJoytoAng.getTurnData());
 		
-		elevator.loopFeed(((m_joystick.getRawAxis(2)*-1) + m_joystick.getRawAxis(3)));
+		elevator.loopFeed(((m_joystick.getRawAxis(2) * -1) + m_joystick.getRawAxis(3)));
 		boxmanipulator.processCMD(RobotEnums.BoxManipulator.HOLD);
 		if(m_joystick.getRawButton(5)) {
 			boxmanipulator.processCMD(RobotEnums.BoxManipulator.DEPOSIT);
@@ -70,7 +70,7 @@ public class Robot extends IterativeRobot {
 	
 	public void initNavXMXP() {
 		try {
-	          ahrs = new AHRS(SPI.Port.kMXP); 
+	          ahrs = new AHRS(SPI.Port.kMXP);
 	      } catch (RuntimeException ex ) {
 	          DriverStation.reportError("Error instantiating navX-MXP:  " + ex.getMessage(), true);
 	      }
