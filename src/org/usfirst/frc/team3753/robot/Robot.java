@@ -5,11 +5,13 @@
 package org.usfirst.frc.team3753.robot;
 
 import com.kauailabs.navx.frc.AHRS;
+import com.ledcontrollerlib.jar.lib.I2CLEDController;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -41,13 +43,18 @@ public class Robot extends IterativeRobot {
 	
 	/// Box Manipulator
 	private BoxManipulator boxmanipulator = new BoxManipulator(RobotParamCollection.kLeftsideBoxMaipulatorPort, RobotParamCollection.kRightsideBoxManipulatorPort, RobotParamCollection.kMotorSpeedBoxManipulator);
-	
 	/// End of Box Manipulator
+	
 	private Joystick m_joystick = new Joystick(RobotParamCollection.kJoystickPort); // Main joystick controller for Robot
 
 	@Override
 	public void robotInit() {
 		initNavXMXP();
+		// Test LED Controller stuffs here.
+		I2CLEDController ledcontroller = new I2CLEDController();
+		Timer.delay(2);
+		ledcontroller.setLEDAnimation(LEDFX.FX_MODE_CHASE_RAINBOW);
+		System.out.println("LED CONTROLS SENT!!");
 	}
 
 	@Override
