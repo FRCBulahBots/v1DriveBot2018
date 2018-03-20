@@ -5,8 +5,6 @@
 package org.usfirst.frc.team3753.robot;
 
 import com.kauailabs.navx.frc.AHRS;
-import com.ledcontrollerlib.jar.lib.I2CLEDController;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
