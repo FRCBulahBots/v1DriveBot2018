@@ -67,7 +67,7 @@ public class I2CLEDController {
 	
 	public boolean setLEDAnimation(LEDFX stripAnim) { // Tells the Controller What Animation to play. Returns T/F if comms appears to be successful
 
-		byte[] payload = {4, (byte) stripAnim.ordinal(), 0, 0}; // Assemble Payload for Controller
+		byte[] payload = {4, (byte) /*stripAnim.ordinal()*/(byte) 16, 0, 0}; // Assemble Payload for Controller
 		boolean write = false;
 		debugPrintln("[LED CONTROLLER] Attempting COMMS Check...");
 		if(confirmComms()) {
