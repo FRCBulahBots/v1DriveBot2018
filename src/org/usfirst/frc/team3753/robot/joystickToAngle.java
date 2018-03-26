@@ -37,6 +37,15 @@ public class JoystickToAngle {
 		pushDashData();
 	}
 	
+	
+	public void autoFeed(double gyroangle) { // Call this whenever we can to feed the sumer with new joystick data
+		currentGyroAngle = gyroangle;
+			gyroControl = true;
+//			finalOutput = (gyroSetpointAngle - gyroangle) * kPSetpoint;
+			finalOutput = clamp((gyroSetpointAngle - gyroangle) * kPSetpoint, -1, 1); // Ensure values are clamped for the 
+		pushDashData();
+	}
+	
 	public double getTurnData() {
 		return finalOutput;
 	}
@@ -45,7 +54,7 @@ public class JoystickToAngle {
 	//	SmartDashboard.putNumber("Turning Joystick value: ", currentJoystickValue);
 		SmartDashboard.putBoolean("Gyro in control: ", gyroControl);
 		SmartDashboard.putNumber("Gyro Setpoint Angle: ", gyroSetpointAngle);
-	//	SmartDashboard.putNumber("Turning output Value: ", finalOutput);
+		SmartDashboard.putNumber("Turning output Value: ", finalOutput);
 	}
 	
 	public static double clamp(double val, double min, double max) {

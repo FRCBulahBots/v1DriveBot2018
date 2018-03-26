@@ -35,7 +35,8 @@ public class Robot extends IterativeRobot {
     private int autonState;
     
     // Sendable chooser to keep track of selected Auto modes
-    private SendableChooser autoCmdFieldChooser;
+    @SuppressWarnings("rawtypes")
+	private SendableChooser autoCmdFieldChooser;
     private int robotFieldPos = 0;
     // List of possible states    
     private final static int AUTON_STATE_DRIVE_FORWARD = 1;
@@ -43,6 +44,7 @@ public class Robot extends IterativeRobot {
     private final static int AUTON_STATE_ELEVATORHOLD = 3;
     private final static int AUTON_STATE_DRIVE_STOP = 4;
     private final static int AUTON_STATE_FINISHED = 5;
+    private final static int AUTON_STATE_DRIVE_PICKSWITCHSIDE = 6;
     
 	///DriveTrain Rotation section
 	private JoystickToAngle DriveJoytoAng = new JoystickToAngle(RobotParamCollection.kdriveControllerDeadband, RobotParamCollection.kturnKP);
@@ -71,8 +73,7 @@ public class Robot extends IterativeRobot {
 		initNavXMXP();
 		
 		// Init the Camera server
-		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
-		camera.setResolution(640, 480);
+		CameraServer.getInstance().startAutomaticCapture();
 		// Test LED Controller stuffs here.
 		I2CLEDController ledcontroller = new I2CLEDController();
 		ledcontroller.setLEDAnimation(LEDFX.FX_MODE_CHASE_RAINBOW);
@@ -144,14 +145,17 @@ public class Robot extends IterativeRobot {
 	
 	public void autonomousPeriodic() {
     	autoDrivenRaise_1();
-    }
+		//autoDrivenMovetoSwitchfromCenter();
+	}
 	
 	public void autoDrivenRaise_1() {
 switch (autonState) {
     	
     	case AUTON_STATE_DRIVE_FORWARD: {
     		// Drive forward at half power for 1.8 seconds
-    		DriveTrain.arcadeDrive(0.65f, 0.0f);
+    		//DriveTrain.arcadeDrive(0.65f, 0.0f);
+    		DriveJoytoAng.feed(0.0f, ahrs.getAngle());
+    		DriveTrain.arcadeDrive(0.65f, DriveJoytoAng.getTurnData());
     		if (autonStateTimer.hasPeriodPassed(1.8)) {
     			changeAutonState(AUTON_STATE_DRIVE_STOP);
     		}
@@ -161,8 +165,7 @@ switch (autonState) {
     	case AUTON_STATE_DRIVE_STOP: {
     		// Turn off drive motors
     		DriveTrain.arcadeDrive(0.0f, 0.0f);
-    		// After 1/2 elapses (time to stop) transition to
-    		// shooter state
+    		// Transition to ELevator raise state
     		if (autonStateTimer.hasPeriodPassed(.5)) {
     			changeAutonState(AUTON_STATE_ELEVATORRAISE);
     		}
@@ -202,6 +205,84 @@ switch (autonState) {
     		  }
     		  }
                     }
+    		boxmanipulator.execute();
+    		if (autonStateTimer.hasPeriodPassed(4.3f)) {
+    			changeAutonState(AUTON_STATE_FINISHED);
+    		}
+    		break;
+    	}
+
+    	case AUTON_STATE_FINISHED: {
+    		// Stopped :)
+    		boxmanipulator.processCMD(RobotEnums.BoxManipulator.HOLD);
+    		boxmanipulator.execute();
+    		break;
+    	}
+    	}
+
+	}
+
+	public void autoDrivenMovetoSwitchfromCenter() {
+switch (autonState) {
+    	
+    	case AUTON_STATE_DRIVE_FORWARD: {
+    		// Drive forward at half power for 1.8 seconds
+    		//DriveTrain.arcadeDrive(0.65f, 0.0f);
+    		DriveJoytoAng.feed(0.0f, ahrs.getAngle());
+    		DriveTrain.arcadeDrive(0.65f, DriveJoytoAng.getTurnData());
+    		if (autonStateTimer.hasPeriodPassed(0.6)) {
+    			changeAutonState(AUTON_STATE_DRIVE_PICKSWITCHSIDE);
+    		}
+    		break;
+    	}
+
+    	
+    	case AUTON_STATE_DRIVE_PICKSWITCHSIDE: {
+    		String gameData;
+    		gameData = DriverStation.getInstance().getGameSpecificMessage();
+                    if(gameData.length() > 0)
+                    {
+    		  switch(gameData.charAt(0)) { // This code switches based on the switch color
+    		  case 'L': {
+    	    		DriveJoytoAng.overrideAngle(-80.0f);
+    	    		DriveJoytoAng.autoFeed(ahrs.getAngle());
+    	    		DriveTrain.arcadeDrive(0.35f, DriveJoytoAng.getTurnData());
+    			  break;
+    		  }
+    		  case 'R': {
+    			  DriveJoytoAng.overrideAngle(80.0f);
+    			  DriveJoytoAng.autoFeed(ahrs.getAngle());
+  	    		DriveTrain.arcadeDrive(0.35f, DriveJoytoAng.getTurnData() * 1.3);
+    			  break;
+    		  }
+    		  }
+                    }
+            		if (autonStateTimer.hasPeriodPassed(2.7)) {
+            		//	changeAutonState(AUTON_STATE_DRIVE_STOP);
+            		}
+    	}
+    	
+    	case AUTON_STATE_DRIVE_STOP: {
+    		// Turn off drive motors
+    		//DriveTrain.arcadeDrive(0.0f, 0.0f);
+    		// Transition to ELevator raise state
+    		if (autonStateTimer.hasPeriodPassed(.5)) {
+    			changeAutonState(AUTON_STATE_ELEVATORRAISE);
+    		}
+    		break;
+    	}
+
+    	case AUTON_STATE_ELEVATORRAISE: {
+    		elevator.loopFeed(-0.4f);
+    		if (autonStateTimer.hasPeriodPassed(3.75f)) {
+    			changeAutonState(AUTON_STATE_ELEVATORHOLD);
+    		}
+    		break;
+    	}
+
+    	case AUTON_STATE_ELEVATORHOLD: {
+    		elevator.loopFeed(0.0f);
+
     		boxmanipulator.execute();
     		if (autonStateTimer.hasPeriodPassed(4.3f)) {
     			changeAutonState(AUTON_STATE_FINISHED);
