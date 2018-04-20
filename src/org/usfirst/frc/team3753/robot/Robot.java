@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Compressor;
 /**
@@ -33,19 +32,25 @@ public class Robot extends IterativeRobot {
     private Timer autonStateTimer;
     
     // Keeps track of current state
-    private int autonState;
+    private AUTO_STATE autonState;
     
     // Sendable chooser to keep track of selected Auto modes
     @SuppressWarnings("rawtypes")
-	private SendableChooser autoCmdFieldChooser;
+    private SendableChooser autoCmdFieldChooser;
     private int robotFieldPos = 0;
     // List of possible states    
-    private final static int AUTON_STATE_DRIVE_FORWARD = 1;
-    private final static int AUTON_STATE_ELEVATORRAISE = 2;
-    private final static int AUTON_STATE_ELEVATORHOLD = 3;
-    private final static int AUTON_STATE_DRIVE_STOP = 4;
-    private final static int AUTON_STATE_FINISHED = 5;
-    private final static int AUTON_STATE_DRIVE_PICKSWITCHSIDE = 6;
+    
+    enum AUTO_STATE {
+    	AUTON_STATE_DRIVE_FORWARD,
+    	AUTON_STATE_ELEVATORRAISE,
+    	AUTON_STATE_ELEVATORHOLD,
+    	AUTON_STATE_DRIVE_STOP,
+    	AUTON_STATE_DRIVE_STRAIGHT,
+    	AUTON_STATE_FINISHED,
+    	AUTON_STATE_DRIVE_PICKSWITCHSIDE,
+    	AUTON_STATE_DRIVE_STRAIGHTTOFIELD
+    	
+    }
     
 	///DriveTrain Rotation section
 	private JoystickToAngle DriveJoytoAng = new JoystickToAngle(RobotParamCollection.kdriveControllerDeadband, RobotParamCollection.kturnKP);
@@ -80,9 +85,10 @@ public class Robot extends IterativeRobot {
 		ledcontroller.setLEDAnimation(LEDFX.FX_MODE_CHASE_RAINBOW);
 		System.out.println("LED CONTROLS SENT!!");
 		autoCmdFieldChooser = new SendableChooser();
-		autoCmdFieldChooser.addDefault("Center", 0);
+		autoCmdFieldChooser.addDefault("Center (STRAIGHT)", 0);
 		autoCmdFieldChooser.addObject("Left Side", 1);
 		autoCmdFieldChooser.addObject("Right Side", 2);
+		autoCmdFieldChooser.addDefault("Center (FULL AUTON)", 3);
 	    SmartDashboard.putData("Autonomous Side Selector", autoCmdFieldChooser);
 	    
 	    // Activate Compressor
@@ -141,7 +147,7 @@ public class Robot extends IterativeRobot {
 	// Helper method to change to new state and reset timer so
     // states can keep track of how long they have been running.
 
-    private void changeAutonState(int nextState) {
+    private void changeAutonState(AUTO_STATE nextState) {
     	if (nextState != autonState) {
     		autonState = nextState;
     		autonStateTimer.reset();
@@ -152,16 +158,19 @@ public class Robot extends IterativeRobot {
 		// Fetch FMS switch side data
 		robotFieldPos = (int) autoCmdFieldChooser.getSelected();
     	// Reset auton state to initial drive forward and reset the timer
-    	autonState = AUTON_STATE_DRIVE_FORWARD;
+    	autonState = AUTO_STATE.AUTON_STATE_DRIVE_FORWARD;
     	autonStateTimer = new Timer();
         // Not sure if start() is required anymore, but it shouldn't hurt
         autonStateTimer.start();
 	}
 	
 	public void autonomousPeriodic() {
+		if(robotFieldPos == 3) {
+			autoDrivenMovetoSwitchfromCenter();	
+		} else {
     	autoDrivenRaise_1();
-		//autoDrivenMovetoSwitchfromCenter();
-	}
+		}
+		}
 	
 	public void autoDrivenRaise_1() {
 switch (autonState) {
@@ -172,7 +181,7 @@ switch (autonState) {
     		DriveJoytoAng.feed(0.0f, ahrs.getAngle());
     		DriveTrain.arcadeDrive(0.65f, DriveJoytoAng.getTurnData());
     		if (autonStateTimer.hasPeriodPassed(1.8)) {
-    			changeAutonState(AUTON_STATE_DRIVE_STOP);
+    			changeAutonState(AUTO_STATE.AUTON_STATE_DRIVE_STOP);
     		}
     		break;
     	}
@@ -182,7 +191,7 @@ switch (autonState) {
     		DriveTrain.arcadeDrive(0.0f, 0.0f);
     		// Transition to ELevator raise state
     		if (autonStateTimer.hasPeriodPassed(.5)) {
-    			changeAutonState(AUTON_STATE_ELEVATORRAISE);
+    			changeAutonState(AUTO_STATE.AUTON_STATE_ELEVATORRAISE);
     		}
     		break;
     	}
@@ -190,7 +199,7 @@ switch (autonState) {
     	case AUTON_STATE_ELEVATORRAISE: {
     		elevator.loopFeed(-0.4f);
     		if (autonStateTimer.hasPeriodPassed(3.75f)) {
-    			changeAutonState(AUTON_STATE_ELEVATORHOLD);
+    			changeAutonState(AUTO_STATE.AUTON_STATE_ELEVATORHOLD);
     		}
     		break;
     	}
@@ -222,7 +231,7 @@ switch (autonState) {
                     }
     		boxmanipulator.execute();
     		if (autonStateTimer.hasPeriodPassed(4.3f)) {
-    			changeAutonState(AUTON_STATE_FINISHED);
+    			changeAutonState(AUTO_STATE.AUTON_STATE_FINISHED);
     		}
     		break;
     	}
@@ -246,7 +255,7 @@ switch (autonState) {
     		DriveJoytoAng.feed(0.0f, ahrs.getAngle());
     		DriveTrain.arcadeDrive(0.65f, DriveJoytoAng.getTurnData());
     		if (autonStateTimer.hasPeriodPassed(0.6)) {
-    			changeAutonState(AUTON_STATE_DRIVE_PICKSWITCHSIDE);
+    			changeAutonState(AUTO_STATE.AUTON_STATE_DRIVE_PICKSWITCHSIDE);
     		}
     		break;
     	}
@@ -269,42 +278,52 @@ switch (autonState) {
     			  DriveJoytoAng.overrideAngle(80.0f);
     			  DriveJoytoAng.autoFeed(ahrs.getAngle());
   	    		DriveTrain.arcadeDrive(0.35f, DriveJoytoAng.getTurnData() * 1.3f);
-  	    		DriveTrain.arcadeDrive(0.25f, 0.0f);
     			  break;
     		  }
     		  }
                     }
             		if (autonStateTimer.hasPeriodPassed(2.7)) {
-            			//changeAutonState(AUTON_STATE_DRIVE_STOP);
+            		changeAutonState(AUTO_STATE.AUTON_STATE_DRIVE_STRAIGHT);
             		}
     	}
     	
-    	case AUTON_STATE_DRIVE_STOP: {
-    		// Turn off drive motors
-    		//DriveTrain.arcadeDrive(0.0f, 0.0f);
-    		// Transition to ELevator raise state
-    		DriveTrain.arcadeDrive(0.65f, 0.0f);
-    		if (autonStateTimer.hasPeriodPassed(.5)) {
-    			changeAutonState(AUTON_STATE_ELEVATORRAISE);
+    	case AUTON_STATE_DRIVE_STRAIGHT: {
+    		DriveJoytoAng.feed(0.0f, ahrs.getAngle());
+    		DriveTrain.arcadeDrive(0.65f, DriveJoytoAng.getTurnData());
+    		if (autonStateTimer.hasPeriodPassed(1.5)) {
+    			changeAutonState(AUTO_STATE.AUTON_STATE_DRIVE_STRAIGHTTOFIELD);
     		}
     		break;
     	}
-
+    	
+    	case AUTON_STATE_DRIVE_STRAIGHTTOFIELD: {
+    		DriveJoytoAng.overrideAngle(0.0f);
+    		DriveJoytoAng.autoFeed(ahrs.getAngle());
+    		DriveTrain.arcadeDrive(0.35f, DriveJoytoAng.getTurnData() * 1.3f);
+    		if (autonStateTimer.hasPeriodPassed(2.5)) {
+    			changeAutonState(AUTO_STATE.AUTON_STATE_ELEVATORRAISE);
+    		}
+    		break;
+    	}
+    	
     	case AUTON_STATE_ELEVATORRAISE: {
     		DriveTrain.arcadeDrive(0.00f, 0.0f);
     		elevator.loopFeed(-0.4f);
     		if (autonStateTimer.hasPeriodPassed(3.75f)) {
-    			changeAutonState(AUTON_STATE_ELEVATORHOLD);
+    			changeAutonState(AUTO_STATE.AUTON_STATE_ELEVATORHOLD);
     		}
     		break;
     	}
+    	
+
+
 
     	case AUTON_STATE_ELEVATORHOLD: {
     		elevator.loopFeed(0.0f);
-
+    		boxmanipulator.processCMD(RobotEnums.BoxManipulator.DEPOSIT);
     		boxmanipulator.execute();
     		if (autonStateTimer.hasPeriodPassed(4.3f)) {
-    			changeAutonState(AUTON_STATE_FINISHED);
+    			changeAutonState(AUTO_STATE.AUTON_STATE_FINISHED);
     		}
     		break;
     	}
