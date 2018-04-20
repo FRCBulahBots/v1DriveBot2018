@@ -1,4 +1,5 @@
 package org.usfirst.frc.team3753.robot;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Spark;
 
 public class BoxManipulator {
@@ -6,10 +7,11 @@ public class BoxManipulator {
 	private Spark leftSideMotors;
 	private double motorSpeed;
 	private int motordir;
-	
-	public BoxManipulator(int rightsidemotorport, int leftsidemotorport, double speed) {
+	private DoubleSolenoid armSolenoid;
+	public BoxManipulator(int rightsidemotorport, int leftsidemotorport, int inactuatorport, int outactuatorport, double speed) {
 		rightSideMotors = new Spark(rightsidemotorport);
 		leftSideMotors = new Spark(leftsidemotorport);
+		armSolenoid = new DoubleSolenoid(inactuatorport, outactuatorport);
 		motorSpeed = speed;
 	}
 	
@@ -17,13 +19,24 @@ public class BoxManipulator {
 		motorSpeed = speed;
 	}
 	
-	public void loopFeed(double joyval) {
-		if(joyval > 0.2f) {
-			processCMD(RobotEnums.BoxManipulator.RECEIVE);
-		} else if (joyval < 0.2f && joyval > -0.2f) {
-			processCMD(RobotEnums.BoxManipulator.HOLD);
-		} else {
-			processCMD(RobotEnums.BoxManipulator.DEPOSIT);
+	public void loopFeed(double joyval, int actuatorpos) {
+//		if(joyval > 0.2f) {
+//			processCMD(RobotEnums.BoxManipulator.RECEIVE);
+//		} else if (joyval < 0.2f && joyval > -0.2f) {
+//			processCMD(RobotEnums.BoxManipulator.HOLD);
+//		} else {
+//			processCMD(RobotEnums.BoxManipulator.DEPOSIT);
+//		}
+		switch(actuatorpos) {
+		case -1:
+			armSolenoid.set(DoubleSolenoid.Value.kReverse);
+			break;
+		case 0:
+			armSolenoid.set(DoubleSolenoid.Value.kOff);
+			break;
+		case 1:
+			armSolenoid.set(DoubleSolenoid.Value.kForward);
+			break;
 		}
 	}
 	

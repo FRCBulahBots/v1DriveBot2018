@@ -9,6 +9,8 @@ public class RobotParamCollection {
 	public static final double kMotorSpeedDriveTrain = 1.0f;
 	public static final int kRightsideBoxManipulatorPort = 3; // Box Manipulator Right-side Drive motor Port
 	public static final int kLeftsideBoxMaipulatorPort = 4; // Box Manipulator Left-side Drive motor Port
+	public static final int kBoxMaipulatorActuatorin = 0; // Box Manipulator Solenoid In
+	public static final int kBoxMaipulatorActuatorout = 1; // Box Manipulator Solenoid out
 	public static final double kMotorSpeedBoxManipulator = 1.0f;
 	
 	public static final int kLiftMotorPort = 2; // Elevator Drive motor Port

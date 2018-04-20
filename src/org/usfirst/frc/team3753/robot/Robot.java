@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
+import edu.wpi.first.wpilibj.Compressor;
 /**
  * This is a sample program to demonstrate how to use a gyro sensor to make a
  * robot drive straight. This program uses a joystick to drive forwards and
@@ -62,7 +63,7 @@ public class Robot extends IterativeRobot {
 	/// End of Elevator Manipulator
 	
 	/// Box Manipulator
-	private BoxManipulator boxmanipulator = new BoxManipulator(RobotParamCollection.kLeftsideBoxMaipulatorPort, RobotParamCollection.kRightsideBoxManipulatorPort, RobotParamCollection.kMotorSpeedBoxManipulator);
+	private BoxManipulator boxmanipulator = new BoxManipulator(RobotParamCollection.kLeftsideBoxMaipulatorPort, RobotParamCollection.kRightsideBoxManipulatorPort, RobotParamCollection.kBoxMaipulatorActuatorin, RobotParamCollection.kBoxMaipulatorActuatorout, RobotParamCollection.kMotorSpeedBoxManipulator);
 	/// End of Box Manipulator
 	
 	private Joystick m_joystick = new Joystick(RobotParamCollection.kJoystickPort); // Main joystick controller for Robot
@@ -83,6 +84,12 @@ public class Robot extends IterativeRobot {
 		autoCmdFieldChooser.addObject("Left Side", 1);
 		autoCmdFieldChooser.addObject("Right Side", 2);
 	    SmartDashboard.putData("Autonomous Side Selector", autoCmdFieldChooser);
+	    
+	    // Activate Compressor
+	    Compressor c = new Compressor(0);
+
+	    c.setClosedLoopControl(true);
+	    
 	}
 
 	@Override
@@ -106,6 +113,14 @@ public class Robot extends IterativeRobot {
 		if(m_joystick.getRawButton(6)) {
 			boxmanipulator.processCMD(RobotEnums.BoxManipulator.DEPOSIT);
 		}
+		
+		if (m_joystick.getRawButton(1)) {
+			boxmanipulator.loopFeed(0.0f, -1);
+		}
+		else {
+			boxmanipulator.loopFeed(0.0f, 1);
+		}
+		
 		boxmanipulator.execute();
 	}
 	
@@ -246,19 +261,21 @@ switch (autonState) {
     		  case 'L': {
     	    		DriveJoytoAng.overrideAngle(-80.0f);
     	    		DriveJoytoAng.autoFeed(ahrs.getAngle());
-    	    		DriveTrain.arcadeDrive(0.35f, DriveJoytoAng.getTurnData());
+    	    		DriveTrain.arcadeDrive(0.35f, DriveJoytoAng.getTurnData() * 1.3f);
+    	    		
     			  break;
     		  }
     		  case 'R': {
     			  DriveJoytoAng.overrideAngle(80.0f);
     			  DriveJoytoAng.autoFeed(ahrs.getAngle());
-  	    		DriveTrain.arcadeDrive(0.35f, DriveJoytoAng.getTurnData() * 1.3);
+  	    		DriveTrain.arcadeDrive(0.35f, DriveJoytoAng.getTurnData() * 1.3f);
+  	    		DriveTrain.arcadeDrive(0.25f, 0.0f);
     			  break;
     		  }
     		  }
                     }
             		if (autonStateTimer.hasPeriodPassed(2.7)) {
-            		//	changeAutonState(AUTON_STATE_DRIVE_STOP);
+            			//changeAutonState(AUTON_STATE_DRIVE_STOP);
             		}
     	}
     	
@@ -266,6 +283,7 @@ switch (autonState) {
     		// Turn off drive motors
     		//DriveTrain.arcadeDrive(0.0f, 0.0f);
     		// Transition to ELevator raise state
+    		DriveTrain.arcadeDrive(0.65f, 0.0f);
     		if (autonStateTimer.hasPeriodPassed(.5)) {
     			changeAutonState(AUTON_STATE_ELEVATORRAISE);
     		}
@@ -273,6 +291,7 @@ switch (autonState) {
     	}
 
     	case AUTON_STATE_ELEVATORRAISE: {
+    		DriveTrain.arcadeDrive(0.00f, 0.0f);
     		elevator.loopFeed(-0.4f);
     		if (autonStateTimer.hasPeriodPassed(3.75f)) {
     			changeAutonState(AUTON_STATE_ELEVATORHOLD);
