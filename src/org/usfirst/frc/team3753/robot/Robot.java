@@ -268,9 +268,9 @@ switch (autonState) {
                     {
     		  switch(gameData.charAt(0)) { // This code switches based on the switch color
     		  case 'L': {
-    	    		DriveJoytoAng.overrideAngle(-80.0f);
+    	    		DriveJoytoAng.overrideAngle(-130.0f);
     	    		DriveJoytoAng.autoFeed(ahrs.getAngle());
-    	    		DriveTrain.arcadeDrive(0.35f, DriveJoytoAng.getTurnData() * 1.3f);
+    	    		DriveTrain.arcadeDrive(0.35f, DriveJoytoAng.getTurnData() * 3.2f);
     	    		
     			  break;
     		  }
@@ -299,8 +299,8 @@ switch (autonState) {
     	case AUTON_STATE_DRIVE_STRAIGHTTOFIELD: {
     		DriveJoytoAng.overrideAngle(0.0f);
     		DriveJoytoAng.autoFeed(ahrs.getAngle());
-    		DriveTrain.arcadeDrive(0.35f, DriveJoytoAng.getTurnData() * 1.3f);
-    		if (autonStateTimer.hasPeriodPassed(2.5)) {
+    		DriveTrain.arcadeDrive(0.35f, DriveJoytoAng.getTurnData() * 3.8f);
+    		if (autonStateTimer.hasPeriodPassed(3.6)) {
     			changeAutonState(AUTO_STATE.AUTON_STATE_ELEVATORRAISE);
     		}
     		break;
