@@ -300,7 +300,7 @@ switch (autonState) {
     		DriveJoytoAng.overrideAngle(0.0f);
     		DriveJoytoAng.autoFeed(ahrs.getAngle());
     		DriveTrain.arcadeDrive(0.35f, DriveJoytoAng.getTurnData() * 3.8f);
-    		if (autonStateTimer.hasPeriodPassed(3.6)) {
+    		if (autonStateTimer.hasPeriodPassed(/*3.6*/4.2)) { // PREVIOUS FORWARD TIME WAS 3.6 -> 4.2
     			changeAutonState(AUTO_STATE.AUTON_STATE_ELEVATORRAISE);
     		}
     		break;

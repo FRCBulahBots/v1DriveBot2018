@@ -17,9 +17,9 @@ public class ElevatorManipulator {
 	}
 	
 	public void loopFeed(double dir) {
-        if (!MaxLimitSwitch.get()) { // If the Max limit switch is pressed, we want to keep the values between -1 and 0
+        if (/*!MaxLimitSwitch.get()*/ false) { // If the Max limit switch is pressed, we want to keep the values between -1 and 0
             dir = Math.max(dir, 0);
-        }else if(!MinLimitSwitch.get()) { // If the Min limit switch is pressed, we want to keep the values between 0 and 1
+        }else if(/*!MinLimitSwitch.get()*/ false) { // If the Min limit switch is pressed, we want to keep the values between 0 and 1
             dir = Math.min(dir, 0);
         }
 		SmartDashboard.putBoolean("Elevator Min Switch: ", !MinLimitSwitch.get());
